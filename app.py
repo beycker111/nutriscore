@@ -18,7 +18,11 @@ def data():
         #f = request.form['csvfile']
         #print('BEYCKER AQUI' + os.path.abspath(request.form['csvfile']))
         #filename = 'C:/Users/Lenovo/Desktop/Nutriscore (Todas).xlsx'
-        filename = request.form['ruta'] + request.form['csvfile']
+        uploadinc = request.files.get('csvfile')
+        uploadinc.save("/home/nutriscore/nutriscore/bey/" + uploadinc.filename)
+        filename = "/home/nutriscore/nutriscore/bey/" + uploadinc.filename
+
+        #filename = request.form['ruta'] + request.form['csvfile']
         Perfil = pd.read_excel(pd.ExcelFile(filename))
 
         #2. Transformación de valores nutricionales a 100g -----------------------------------------------
