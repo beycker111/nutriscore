@@ -1,0 +1,25 @@
+{% extends './base.html' %} {% block title %} Index {% endblock %} {% block body %}
+<div class="row">
+    <div class="col-md-12 offset-md-0">
+        <br>
+        <h4>
+            <center><b>DATOS NUTRISCORE</b></center>
+        </h4><br>
+
+        <center>
+            <form class="" action="data" method="post">
+                <input type="text" name="ruta" placeholder="Ruta del archivo a calcular" size="30"> 
+                <input type="file" name="csvfile" value="" class="btn btn-outline-danger">
+                <input type="submit" name="" value="Calcular" class="btn btn-outline-success">
+            </form>
+            <br>
+            <br>
+            <form class="" action="formato" method="post">
+                <input type="text" name="ruta" placeholder="Ruta para guardar formato guia en excel" size="85">
+                <input type="submit" name="" value="Descargar" class="btn btn-outline-success">
+            </form>
+        </center>
+        <script>
+            alert("Para realizar un nuevo cálculo de Nutriscore, oprima el botón 'Examinar'. Debe cargar una hoja de cálculo (.xlsx) siguiendo el formato que puede descargar con el botón 'Formato'.");
+        </script>
+        {% endblock %}
