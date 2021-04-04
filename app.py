@@ -1,13 +1,5 @@
 from flask import Flask, render_template, request
 import pandas as pd
-import matplotlib.pyplot as plt
-import win32api
-import os
-
-from tkinter import *
-from tkinter import Tk
-from tkinter.filedialog import askopenfilename
-import tkinter as tk
 
 app = Flask(__name__) #Archivo main
 
