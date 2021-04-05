@@ -8,18 +8,16 @@
 
         <center>
             <form class="" action="data" method="post" enctype="multipart/form-data">
-                <input type="text" name="ruta" placeholder="Ruta del archivo a calcular" size="30"> 
                 <input type="file" name="csvfile" value="" class="btn btn-outline-danger">
                 <input type="submit" name="" value="Calcular" class="btn btn-outline-success">
             </form>
             <br>
             <br>
-            <form class="" action="formato" method="post">
-                <input type="text" name="ruta" placeholder="Ruta para guardar formato guia en excel" size="85">
-                <input type="submit" name="" value="Descargar" class="btn btn-outline-success">
+            <form class="" action="formato-nutriscore" method="post" enctype="multipart/form-data">
+                <input type="submit" name="" value="Descargar Formato Nutriscore" class="btn btn-outline-success">
             </form>
         </center>
         <script>
-            alert("Para realizar un nuevo cálculo de Nutriscore, oprima el botón 'Examinar'. Debe cargar una hoja de cálculo (.xlsx) siguiendo el formato que puede descargar con el botón 'Formato'.");
+            alert("Para realizar un nuevo cálculo de Nutriscore, oprima el botón 'Seleccionar Archivo' y posteriormente el botón 'Calcular'. Debe cargar una hoja de cálculo (.xlsx) siguiendo el formato que puede descargar con el botón 'Descargar Formato Nutriscore'.");
         </script>
         {% endblock %}

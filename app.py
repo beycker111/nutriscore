@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import pandas as pd
+import os
 
 app = Flask(__name__) #Archivo main
 
@@ -10,20 +11,19 @@ def index():
 @app.route('/data', methods=['GET', 'POST'])
 def data():
     if request.method == 'POST':
-        #file = request.get_data['upload-file'] #form['upload-file'] ---->POR AQUI
-        #Perfil = pd.read_excel(file) # data= Perfil 
-        #return render_template('data.html', Perfil=data.to_dict())
-        # data=data.to_html())
-        # data=data.to_dict())
-        #f = request.form['csvfile']
-        #print('BEYCKER AQUI' + os.path.abspath(request.form['csvfile']))
-        #filename = 'C:/Users/Lenovo/Desktop/Nutriscore (Todas).xlsx'
-        uploadinc = request.files.get('csvfile')
-        uploadinc.save("/home/nutriscore/nutriscore/bey/" + uploadinc.filename)
-        filename = "/home/nutriscore/nutriscore/bey/" + uploadinc.filename
 
-        #filename = request.form['ruta'] + request.form['csvfile']
-        Perfil = pd.read_excel(pd.ExcelFile(filename))
+        uploadinc = request.files.get('csvfile')
+        #uploadinc.save("/home/nutriscore/nutriscore/" + uploadinc.filename)
+        #filename = "/home/nutriscore/nutriscore/" + uploadinc.filename
+        THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+        my_file = os.path.join(THIS_FOLDER, 'Nutriscore.xlsx')
+
+        uploadinc.save(my_file)
+        filename = my_file
+
+        #THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+        #my_file = os.path.join(THIS_FOLDER, uploadinc.filename)
+        Perfil = pd.read_excel(filename, engine='openpyxl')
 
         #2. Transformación de valores nutricionales a 100g -----------------------------------------------
         Perfil_100 = Perfil
@@ -34,7 +34,7 @@ def data():
         Perfil_100['Sodio (mg)'] = 100*Perfil['Sodio (mg)']/Perfil['Tamaño de porción (g)']
         Perfil_100['Proteína (g)'] = 100*Perfil['Proteína (g)']/Perfil['Tamaño de porción (g)']
         Perfil_100['Fibra (g)'] = 100*Perfil['Fibra (g)']/Perfil['Tamaño de porción (g)']
-        
+
         Perfil_100['Tamaño de porción (g)'] = 100
 
 
@@ -66,7 +66,7 @@ def data():
         Perfil_100['Puntos_energia'][(Perfil_100['Calorías totales (Kcal)']>210) & (Perfil_100['Calorías totales (Kcal)']<=240) & (Perfil_100['category'] == 'Beverages')] = 8
         Perfil_100['Puntos_energia'][(Perfil_100['Calorías totales (Kcal)']>240) & (Perfil_100['Calorías totales (Kcal)']<=270) & (Perfil_100['category'] == 'Beverages')] = 9
         Perfil_100['Puntos_energia'][(Perfil_100['Calorías totales (Kcal)']>270) & (Perfil_100['category'] == 'Beverages')] = 10
-        
+
             #3.2 Puntos N por saturados
         Perfil_100['Puntos_saturados'] = -1
         Perfil_100['Puntos_saturados'][Perfil_100['Grasa saturada (g)']<=1] = 0
@@ -80,7 +80,7 @@ def data():
         Perfil_100['Puntos_saturados'][(Perfil_100['Grasa saturada (g)']>8) & (Perfil_100['Grasa saturada (g)']<=9)] = 8
         Perfil_100['Puntos_saturados'][(Perfil_100['Grasa saturada (g)']>9) & (Perfil_100['Grasa saturada (g)']<=10)] = 9
         Perfil_100['Puntos_saturados'][Perfil_100['Grasa saturada (g)']>10] = 10
-        
+
             #3.3 Puntos N por azucar
             #3.3.1 Para todo menos bebidas
         Perfil_100['Puntos_azucar'] = -1
@@ -106,8 +106,8 @@ def data():
         Perfil_100['Puntos_azucar'][(Perfil_100['Azúcares (g)']>9) & (Perfil_100['Azúcares (g)']<=10.5) & (Perfil_100['category'] == 'Beverages')] = 7
         Perfil_100['Puntos_azucar'][(Perfil_100['Azúcares (g)']>10.5) & (Perfil_100['Azúcares (g)']<=12) & (Perfil_100['category'] == 'Beverages')] = 8
         Perfil_100['Puntos_azucar'][(Perfil_100['Azúcares (g)']>12) & (Perfil_100['Azúcares (g)']<=13.5) & (Perfil_100['category'] == 'Beverages')] = 9
-        Perfil_100['Puntos_azucar'][(Perfil_100['Azúcares (g)']>13.5) & (Perfil_100['category'] == 'Beverages')] = 10  
-            
+        Perfil_100['Puntos_azucar'][(Perfil_100['Azúcares (g)']>13.5) & (Perfil_100['category'] == 'Beverages')] = 10
+
             #3.4 Puntos N por sodio
         Perfil_100['Puntos_sodio'] = -1
         Perfil_100['Puntos_sodio'][Perfil_100['Sodio (mg)']<=90] = 0
@@ -121,12 +121,12 @@ def data():
         Perfil_100['Puntos_sodio'][(Perfil_100['Sodio (mg)']>720) & (Perfil_100['Sodio (mg)']<=810)] = 8
         Perfil_100['Puntos_sodio'][(Perfil_100['Sodio (mg)']>810) & (Perfil_100['Sodio (mg)']<=900)] = 9
         Perfil_100['Puntos_sodio'][Perfil_100['Sodio (mg)']>900] = 10
-        
+
             #3.5 Ratio grasas saturadas, solo para categoria 'Added Fats' PENDIENTE
-            
+
             #3.6 Puntos N = P_energia + P_saturados + P_azucar + P_sodio
         Perfil_100['PuntosN'] = Perfil_100['Puntos_energia']+Perfil_100['Puntos_saturados']+Perfil_100['Puntos_azucar']+Perfil_100['Puntos_sodio']
-        
+
         #4. Cálculo de puntos P (Positivos) ---------------------------------------------------------------
             #4.1 Puntos P por FVP (frutas, verduras, nueves y otros)
             #4.1.1 Para todo menos bebidas
@@ -140,7 +140,7 @@ def data():
         Perfil_100['Puntos_FVP'][(Perfil_100['Frutas_verduras_otros (%)']>40) & (Perfil_100['Frutas_verduras_otros (%)']<=60) & (Perfil_100['category'] == 'Beverages')] = 2
         Perfil_100['Puntos_FVP'][(Perfil_100['Frutas_verduras_otros (%)']>60) & (Perfil_100['Frutas_verduras_otros (%)']<=80) & (Perfil_100['category'] == 'Beverages')] = 4
         Perfil_100['Puntos_FVP'][(Perfil_100['Frutas_verduras_otros (%)']>80) & (Perfil_100['category'] == 'Beverages')] = 10
-            
+
             #4.2 Puntos P por fibra
         Perfil_100['Puntos_fibra'] = -1
         Perfil_100['Puntos_fibra'][Perfil_100['Fibra (g)']<=0.9] = 0
@@ -149,7 +149,7 @@ def data():
         Perfil_100['Puntos_fibra'][(Perfil_100['Fibra (g)']>2.8) & (Perfil_100['Fibra (g)']<=3.7)] = 3
         Perfil_100['Puntos_fibra'][(Perfil_100['Fibra (g)']>3.7) & (Perfil_100['Fibra (g)']<=4.7)] = 4
         Perfil_100['Puntos_fibra'][Perfil_100['Fibra (g)']>4.7] = 5
-            
+
             #4.3 Puntos P por proteina
         Perfil_100['Puntos_proteina'] = -1
         Perfil_100['Puntos_proteina'][Perfil_100['Proteína (g)']<=1.6] = 0
@@ -158,10 +158,10 @@ def data():
         Perfil_100['Puntos_proteina'][(Perfil_100['Proteína (g)']>4.8) & (Perfil_100['Proteína (g)']<=6.4)] = 3
         Perfil_100['Puntos_proteina'][(Perfil_100['Proteína (g)']>6.4) & (Perfil_100['Proteína (g)']<=8)] = 4
         Perfil_100['Puntos_proteina'][Perfil_100['Proteína (g)']>8] = 5
-        
+
             #4.4 Puntos P = P_FVP + P_fibra + P_proteina
         Perfil_100['PuntosP'] = Perfil_100['Puntos_FVP'] + Perfil_100['Puntos_fibra'] + Perfil_100['Puntos_proteina']
-                
+
         #5. Cálculo del Nutriscore ----------------------------------------------------------------------
         #Si Puntos_N>11, no cuenta puntos_proteina, a menos que Puntos_FVP>5
         Perfil_100['Nutriscore'] = 999
@@ -172,11 +172,11 @@ def data():
             elif Perfil_100.loc[i,'category'] == 'Beverages' or Perfil_100.loc[i,'category'] == 'Others':
                 if Perfil_100.loc[i,'PuntosN'] < 11:
                     Perfil_100.loc[i,'Nutriscore'] = Perfil_100.loc[i,'PuntosN'] - Perfil_100.loc[i,'PuntosP']
-                elif Perfil_100.loc[i,'PuntosN'] >= 11 and Perfil_100.loc[i,'Puntos_FVP'] >= 5: 
+                elif Perfil_100.loc[i,'PuntosN'] >= 11 and Perfil_100.loc[i,'Puntos_FVP'] >= 5:
                     Perfil_100.loc[i,'Nutriscore'] = Perfil_100.loc[i,'PuntosN'] - Perfil_100.loc[i,'PuntosP']
                 else:
                     Perfil_100.loc[i,'Nutriscore'] = Perfil_100.loc[i,'PuntosN'] - (Perfil_100.loc[i,'Puntos_FVP'] + Perfil_100.loc[i,'Puntos_fibra'])
-                    
+
         #6. Determinación de NutriLetra -----------------------------------------------------------------
         Perfil_100['NutriLetra'] = ''
         for i,row in Perfil_100.iterrows():
@@ -200,12 +200,12 @@ def data():
                     Perfil_100.loc[i,'NutriLetra'] = 'D'
                 elif Perfil_100.loc[i,'Nutriscore'] >= 19:
                     Perfil_100.loc[i,'NutriLetra'] = 'E'
-                    
+
         #-------------------------------------------------------------------------------------------
         #7. Impresión de resultados --------------------------------------------------------------------
         Perfil['Nutriscore'] = Perfil_100['Nutriscore']
         Perfil['NutriLetra'] = Perfil_100['NutriLetra']
-        
+
         Totales = [sum(Perfil['NutriLetra']=='A'),
                 sum(Perfil['NutriLetra']=='B'),
                 sum(Perfil['NutriLetra']=='C'),
@@ -214,37 +214,45 @@ def data():
     #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
     #------------------------------------------------------------------------------------------------------
-    #Impresión y excel    
+    #Impresión y excel
         #lbl_Resultados.configure(text='Totales: '+str(sum(Totales))+' | A: '+str(Totales[0])+' B: '+str(Totales[1])+' C: '+str(Totales[2])+' D: '+str(Totales[3])+' E: '+str(Totales[4]))
-        
-        filename_salida = filename.replace(".xlsx", " (Calculado).xlsx")
+
+        filename_salida = filename.replace(".xlsx", "(Calculado).xlsx")
         Perfil.to_excel(filename_salida,index=False)
         #messagebox.showinfo(message='Nutriscore calculado, puede encontrar el resultado completo en: '+str(filename_salida), title="Listolas")
         #win32api.MessageBox(0, 'Nutriscore calculado, puede encontrar el resultado completo en: '+str(filename_salida), 'Listolas')
-        return 'Nutriscore calculado, puede encontrar el resultado completo en: '+str(filename_salida)
-    
+        #return 'Nutriscore calculado, puede encontrar el resultado completo en: '+str(filename_salida)
+        return send_file(THIS_FOLDER + '/Nutriscore(Calculado).xlsx')
+
 @app.route('/formato', methods=['GET', 'POST'])
 def Formato():
-    d_formato = {'Material': [2012282,1046489,0,1035440],	
-                 'Descripción': ['Pas. Tosh Bizcocho Hierbas Bx6 132g','Pas. Pita Chips TOSH Cebolla Bs.  156g','Tosh Bebida Tres nueces','Gta. TOSH Wafer Multicereal KIWI Bs. X6'],	
-                 'Tamaño de porción (g)': [22,26,240,27],	
-                 'Calorías totales (Kcal)': [90,110,100,100],	
+    d_formato = {'Material': [2012282,1046489,0,1035440],
+                 'Descripción': ['Pas. Tosh Bizcocho Hierbas Bx6 132g','Pas. Pita Chips TOSH Cebolla Bs.  156g','Tosh Bebida Tres nueces','Gta. TOSH Wafer Multicereal KIWI Bs. X6'],
+                 'Tamaño de porción (g)': [22,26,240,27],
+                 'Calorías totales (Kcal)': [90,110,100,100],
                  'Azúcares (g)': [1,2,0,1],
-                 'Grasa total (g)': [3,4.5,5,6],	
-                 'Grasa saturada (g)': [1.5,1.5,2.5,3],	
-                 'Sodio (mg)': [140,80,20,25],	
-                 'Frutas_verduras_otros (%)': [0,0,0,0],	
-                 'Proteína (g)': [1,2,1,1],	
-                 'Fibra (g)': [1.5,1,5,0],	
+                 'Grasa total (g)': [3,4.5,5,6],
+                 'Grasa saturada (g)': [1.5,1.5,2.5,3],
+                 'Sodio (mg)': [140,80,20,25],
+                 'Frutas_verduras_otros (%)': [0,0,0,0],
+                 'Proteína (g)': [1,2,1,1],
+                 'Fibra (g)': [1.5,1,5,0],
                  'category': ['Others','Others','Beverages','Others']}
     formato_xlsx = pd.DataFrame(data=d_formato)
     formato_xlsx.to_excel(request.form['ruta'] + 'Formato Nutriscore.xlsx',index=False)
     return 'El formato se guardó en:' + request.form['ruta'] + 'Formato Nutriscore.xlsx'
    # messagebox.showinfo(message="El formato se guardó en: "+str(pathlib.Path().absolute())+' con el nombre "Formato Nutriscore"', title="Listolas")
 
-# Inicializar ventana    
 
-    
+@app.route('/formato-nutriscore', methods=['GET', 'POST'])
+def Descarga():
+
+    return send_file('/home/nutriscore/nutriscore/FormatoNutriscore.xlsx')
+
+
+# Inicializar ventana
+
+
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
